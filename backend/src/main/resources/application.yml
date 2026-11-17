@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: remuneracao-global
+  datasource:
+    url: ${RMG_DB_URL:jdbc:postgresql://localhost:5432/rmg}
+    username: ${RMG_DB_USER:rmg}
+    password: ${RMG_DB_PASSWORD:rmg}
+    hikari:
+      connection-timeout: 5000
+      maximum-pool-size: 10
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${RMG_OIDC_JWK_SET_URI:http://localhost:8180/realms/rmg/protocol/openid-connect/certs}
+
+rmg:
+  justificativa:
+    # Variação percentual total acima da qual a justificativa é obrigatória no envio.
+    limite-variacao-percentual: ${RMG_LIMITE_JUSTIFICATIVA:0}
+  cors:
+    allowed-origins: ${RMG_CORS_ORIGINS:http://localhost:3000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  structured:
+    format:
+      console: ecs
