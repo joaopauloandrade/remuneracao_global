@@ -8,7 +8,7 @@ O Módulo de Remuneração Global foi concebido para atender às diretrizes do M
 Historicamente, o processamento da remuneração global ocorria de forma descentralizada e manual, por meio da troca de planilhas eletrônicas e controles paralelos. Esse modelo expunha a administração pública a elevados riscos operacionais, inconsistências de cálculo, retrabalho e baixa rastreabilidade histórica. A implementação no ServiceNow transforma essa dinâmica ao consolidar uma única base de dados relacional e auditável, provendo interfaces segregadas para as empresas estatais e para a equipe técnica e gestora da SEST.
 
 ### 1.2 Arquitetura Scoped Application e Convenções de Nomenclatura
-A solução é desenvolvida sob o paradigma de Scoped Application na plataforma ServiceNow, garantindo o isolamento de escopo técnico, integridade de artefatos e facilidade de promoção entre ambientes via Update Sets ou repositórios de aplicação. Para assegurar o alinhamento com a arquitetura de Customer Service Management (CSM), os processos principais estendem as tabelas nativas de Case e Case Task.
+A solução é desenvolvida sob o paradigma de Scoped Application na plataforma ServiceNow (`x_mgi_rmg`), garantindo o isolamento de escopo técnico, integridade de artefatos e facilidade de promoção entre ambientes via Update Sets ou repositórios de aplicação. Para assegurar o alinhamento com a arquitetura de Customer Service Management (CSM), os processos principais estendem as tabelas nativas de Case e Case Task.
 
 Os identificadores de negócio e prefixos de numeração sequencial automática com 7 dígitos seguem rigorosamente a padronização estabelecida nos requisitos técnicos do projeto:
 
@@ -238,3 +238,64 @@ A aplicação fornece mecanismos automáticos para geração e exportação de r
 | **RNF-06** | Desempenho | Otimização de índices de banco de dados para suportar acessos simultâneos durante os picos de submissão de assembleias. |
 | **RNF-07** | Disponibilidade | Operação em alta disponibilidade garantindo a continuidade do serviço no período de submissão. |
 | **RNF-08** | Escalabilidade | Arquitetura modular em Scoped App permitindo a inclusão futura de novas validações e relatórios sem refatoração estrutural. |
+
+---
+
+## 8. Matriz Completa de Rastreabilidade dos Requisitos de Negócio (RF-01 a RF-44 e RNF-01 a RNF-08)
+
+A tabela a seguir consolida o mapeamento bidirecional exaustivo entre todos os **Requisitos Funcionais (RF-01 a RF-44)** e **Requisitos Não Funcionais (RNF-01 a RNF-08)** especificados no documento de negócio (**MVP AGO.pdf**) e suas respectivas implementações técnicas na arquitetura ServiceNow descrita neste documento (`SPEC.md`):
+
+| ID Requisito | Nome / Descrição Resumida do Requisito (MVP) | Artefato Técnico / Funcionalidade ServiceNow | Seção Correspondente no `SPEC.md` |
+| :--- | :--- | :--- | :--- |
+| **RF-01** | Criação de módulo customizado para Remuneração Global | Scoped Application `x_mgi_rmg` e Workspace dedicado | Seção 1.2 e Seção 6.1 |
+| **RF-02** | Carga inicial e base inicial de rubricas dos anos anteriores | Tabela custom `u_historico_remuneracao` (`u_rmg_historico`) | Seção 3.2 |
+| **RF-03** | Parametrização e manutenção da base de rubricas padrão SEST | Tabela `u_rubrica_sest` com ACL de edição restrita ao grupo `RMG Gestor` | Seção 2.1 e Seção 3.1 |
+| **RF-04** | Perfis de acesso e permissões (Empresa, Técnica, Gestor, Admin) | Grupos `RMG Preenchedor`, `RMG Área Técnica`, `RMG Gestor`, `RMG Administrador` e ACLs | Seção 2.1 e Seção 2.2 |
+| **RF-05** | Acesso segregado por empresa (Leitura/escrita exclusiva) | Data Policies e ACLs com filtro `u_empresa_id = gs.getUser().getCompanyID()` | Seção 2.2 |
+| **RF-06** | Validação automática de formato e tipos numéricos | Dicionário de dados (Decimal, Integer, Currency) e Client Scripts de entrada | Seção 3.2 e Seção 5.1 |
+| **RF-07** | Interface segregada por empresa com salvamento em rascunho | Estado `Em preenchimento` (Draft) e persistência parcial dos registros de Case | Seção 4.1 e Seção 4.2 |
+| **RF-08** | Fluxo de navegação: Nova Proposta, Editar e Visualizar | Dynamic UI Actions e roteamento do Portal/Workspace por estado | Seção 4.1 e Seção 6.1 |
+| **RF-09** | Campos de identificação institucional da proposta | Form Layout na tabela `u_case_rmg` (Datas de Assembleia, Vigência, AGO/AGE, Contatos) | Seção 3.2 |
+| **RF-10** | Visualização tabular em abas por órgão com subtotais e totais | Abas dinâmicas por `u_instancia_sest`, Record Page e cálculo de subtotais/totais | Seção 3.2 e Seção 5.1 |
+| **RF-11** | Regra de validação da matriz Instância x Cargo permitidos | Business Rule / Client Script de validação contra a matriz estatutária | Seção 5.2 |
+| **RF-12** | Adição de novas abas (Órgãos estatutários adicionais) | Registros na tabela `u_instancias_gestao` com renderização dinâmica de abas | Seção 3.1 e Seção 6.1 |
+| **RF-13** | Exclusão de abas (Remoção de órgãos estatutários) | Ação de desativação/exclusão em `u_instancias_gestao` e linhas filhas | Seção 3.1 e Seção 4.3 |
+| **RF-14** | Edição flexível das linhas de rubrica (Adicionar, Editar, Excluir) | Ações de registro nas tarefas estruturais `RMGTASK` e `RMGSTASK` | Seção 3.2 e Seção 4.3 |
+| **RF-15** | Adição de rubrica com busca e auto-preenchimento da base vigente | Script Include de busca automatizada por combinação (Órgão + Cargo + Rubrica) | Seção 3.2 e Seção 5.1 |
+| **RF-16** | Validação de rubrica em duplicidade com emissão de alerta | Client Script de verificação de chave duplicada na proposta corrente | Seção 3.1 e Seção 5.2 |
+| **RF-17** | Edição de campos de rubrica via modal / pop-up no formulário | Modal de edição na Record Page com recálculo instantâneo | Seção 3.2 e Seção 6.1 |
+| **RF-18** | Exclusão de rubricas com confirmação obrigatória do usuário | Alerta de diálogo e alteração de estado da tarefa para `Excluída` | Seção 4.3 |
+| **RF-19** | Exigência de justificativa textual obrigatória para alterações | Data Policy / UI Policy validando obrigatoriedade do campo `u_justificativa` | Seção 3.2 |
+| **RF-20** | Validação automática de preenchimento e campos obrigatórios | Server-Side Business Rules (`before insert/update`) e Client Validation | Seção 3.2 e Seção 5.1 |
+| **RF-21** | Validação das regras de rubricas (13º, Férias, Quarentena, CA 10%) | Server-Side Business Rule de auditoria matemática com alertas orientativos | Seção 5.3 |
+| **RF-22** | Salvamento parcial da proposta em modo rascunho | Persistência de estado mantida como `Em preenchimento` | Seção 4.1 |
+| **RF-23** | Extração de relatório de rascunho com marca d'água "Minuta" | Exportador de documentos PDF/Excel com marca d'água "Minuta" no cabeçalho | Seção 7.2 |
+| **RF-24** | Submissão oficial da proposta e bloqueio imediato para edição | Transição para estado `Proposta enviada` e fotocópia congelada em `u_proposta_enviada` | Seção 4.1 e Seção 3.2 |
+| **RF-25** | Atualização automática da base de rubricas para status "Proposta" | Evento de inserção na tabela de propostas com status `Proposta` | Seção 3.2 e Seção 4.1 |
+| **RF-26** | Extração do relatório oficial da proposta submetida | Módulo de geração de relatório consolidado (Modelo Relatório 2) | Seção 7.2 |
+| **RF-27** | Visualização da Área Técnica (Submetidas, Rubricas e Dados Inst.) | Menu lateral e dashboard no `Remuneração Global Workspace` | Seção 6.1 |
+| **RF-28** | Botão/Filtro "Propostas Submetidas" na Área Técnica | Lista filtrada do Workspace exibindo casos `u_case_rmg` no estado `Proposta enviada` | Seção 6.1 e Seção 6.2 |
+| **RF-29** | Botão/Filtro "Base de Rubricas" na Área Técnica | Módulo de consulta e filtragem da base histórica de rubricas vigentes | Seção 3.2 e Seção 6.1 |
+| **RF-30** | Botão/Filtro "Base de Dados Institucionais" na Área Técnica | Módulo de consulta e exportação dos dados cadastrais institucionais (RF-09) | Seção 3.2 e Seção 6.3 |
+| **RF-31** | Gestão do ciclo de vida do status (Proposta -> Em análise -> Aprovada) | Transições de estado nos casos `u_case_rmg` e duplicação controlada de linhas | Seção 4.1 e Seção 4.3 |
+| **RF-32** | Visualização agrupada de propostas cadastradas para a SEST | Record Page com visão consolidada das abas estatutárias (Layout Esperado) | Seção 6.1 |
+| **RF-33** | Edição técnica pela SEST com colunas de variação e observações | Ativação dos campos editáveis `u_var_mensal_perc`, `u_var_total_perc` e `u_obs_sest` | Seção 3.2 e Seção 4.1 |
+| **RF-34** | Cálculo automático das variações percentuais mensal e total | Fórmulas no servidor: $\text{Var \%} = ((V_{\text{prop}} / V_{\text{vig}}) - 1) \times 100$ | Seção 5.1 |
+| **RF-35** | Identificação visual de alterações realizadas na proposta | Destaque visual (Highlighting / Badges de modificação) no Workspace | Seção 6.1 |
+| **RF-36** | Identificação visual de alterações em relação à base vigente | Destaque comparativo entre proposta submetida e histórico vigente | Seção 6.1 |
+| **RF-37** | Devolução para ajustes com notificação e limpeza de linhas | Transição para estado `Devolvida para ajuste`, notificação e reabertura de edição | Seção 4.1 |
+| **RF-38** | Aprovação formal da proposta com atualização da base e trava | Estado `Aprovada`, atualização do `u_historico_remuneracao` e trava Read-Only | Seção 4.1 e Seção 3.2 |
+| **RF-39** | Rastreabilidade e trilha de auditoria completa | Ativação nativa de `sys_audit` (Audit Log) em todas as tabelas do módulo | Seção 7.1 |
+| **RF-40** | Consolidação automática (Totais por Órgão, Diretoria+CA e Geral) | Rollup Summaries e cálculos de consolidação financeira no servidor (Relatório 1) | Seção 5.1 e Seção 7.2 |
+| **RF-41** | Geração de relatórios consolidados em Excel (.xlsx) e PDF | Módulo de exportação de relatórios tabulares e formatados (Relatório 1) | Seção 7.2 |
+| **RF-42** | Exportação da base de rubricas atualizada em Excel (.xlsx) | Exportador da lista `u_historico_remuneracao` em formato `.xlsx` | Seção 7.2 |
+| **RF-43** | Exportação do relatório de dados institucionais em PDF | Módulo de exportação em PDF das informações cadastrais institucionais (RF-09) | Seção 7.2 |
+| **RF-44** | Geração automática do Anexo de Nota Técnica em PDF pesquisável | Gerador de PDF nativo com OCR / texto selecionável para a Nota Técnica | Seção 7.2 |
+| **RNF-01** | Segurança da informação (Isolamento por empresa e papéis) | ACLs por empresa (`u_empresa_id`) e papéis dos 4 grupos funcionais | Seção 2.2 e Seção 7.3 |
+| **RNF-02** | Integridade dos dados (Imutabilidade por exercício) | Versionamento anual e bloqueio Read-Only em exercícios encerrados | Seção 3.2 e Seção 7.3 |
+| **RNF-03** | Rastreabilidade (Logs completos de ações) | Habilitação nativa do `sys_audit` no Dicionário de Dados | Seção 7.1 e Seção 7.3 |
+| **RNF-04** | Usabilidade (Interface tabular intuitiva e mensagens claras) | Padrão Next Experience, formulários tabulares e Client Validation orientativo | Seção 6.1 e Seção 7.3 |
+| **RNF-05** | Confiabilidade (Execução exclusiva de regras no servidor) | Server-Side Business Rules e Script Includes (Fonte única de verdade) | Seção 5.1 e Seção 7.3 |
+| **RNF-06** | Desempenho (Otimização para picos de submissão) | Criação de índices de banco (`sys_index`) em campos de filtro frequente | Seção 7.3 |
+| **RNF-07** | Disponibilidade (Operação contínua em alta disponibilidade) | Diretrizes de infraestrutura SaaS ServiceNow High Availability | Seção 7.3 |
+| **RNF-08** | Escalabilidade (Arquitetura modular em Scoped App) | Estrutura modular isolada em Scoped Application (`x_mgi_rmg`) | Seção 1.2 e Seção 7.3 |
