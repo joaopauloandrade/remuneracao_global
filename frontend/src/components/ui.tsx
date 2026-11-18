@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ButtonHTMLAttributes, ComponentPropsWithRef, ReactNode } from 'react';
+import { SessaoUsuario } from './sessao-usuario';
 
 export function Cabecalho({ titulo, acoes }: { titulo: string; acoes?: ReactNode }) {
   return (
@@ -58,7 +59,7 @@ export function Navegacao() {
         <Link href="/" className="text-slate-700 hover:text-blue-800">Painel</Link>
         <Link href="/casos" className="text-slate-700 hover:text-blue-800">Casos</Link>
         <Link href="/cadastros" className="text-slate-700 hover:text-blue-800">Cadastros</Link>
-        <Link href="/sessao" className="ml-auto text-slate-500 hover:text-blue-800">Sessão</Link>
+        <SessaoUsuario />
       </nav>
     </header>
   );

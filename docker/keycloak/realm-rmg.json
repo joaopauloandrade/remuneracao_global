@@ -1,0 +1,108 @@
+{
+  "realm": "rmg",
+  "enabled": true,
+  "displayName": "Remuneração Global - Desenvolvimento",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "resetPasswordAllowed": false,
+  "sslRequired": "none",
+  "groups": [
+    { "name": "RMG_Portal_Submitters" },
+    { "name": "RMG_Technical_Staff" },
+    { "name": "RMG_Managers" },
+    { "name": "RMG_Admins" }
+  ],
+  "clients": [
+    {
+      "clientId": "rmg-frontend",
+      "name": "Remuneração Global Frontend",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/auth/callback"],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "grupos-rmg",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "claim.name": "groups"
+          }
+        },
+        {
+          "name": "empresa",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "company_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true",
+            "claim.name": "company_id",
+            "jsonType.label": "String",
+            "multivalued": "false"
+          }
+        }
+      ],
+      "defaultClientScopes": ["web-origins", "acr", "profile", "email", "roles"],
+      "optionalClientScopes": ["address", "phone", "offline_access", "microprofile-jwt"]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin.rmg",
+      "email": "admin.rmg@example.local",
+      "firstName": "Administrador",
+      "lastName": "RMG",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["RMG_Admins"],
+      "attributes": { "company_id": ["1001"] },
+      "credentials": [{ "type": "password", "value": "admin123", "temporary": false }]
+    },
+    {
+      "username": "preenchedor.rmg",
+      "email": "preenchedor.rmg@example.local",
+      "firstName": "Preenchedor",
+      "lastName": "RMG",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["RMG_Portal_Submitters"],
+      "attributes": { "company_id": ["1001"] },
+      "credentials": [{ "type": "password", "value": "preenchedor123", "temporary": false }]
+    },
+    {
+      "username": "tecnico.rmg",
+      "email": "tecnico.rmg@example.local",
+      "firstName": "Técnico",
+      "lastName": "RMG",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["RMG_Technical_Staff"],
+      "credentials": [{ "type": "password", "value": "tecnico123", "temporary": false }]
+    },
+    {
+      "username": "gestor.rmg",
+      "email": "gestor.rmg@example.local",
+      "firstName": "Gestor",
+      "lastName": "RMG",
+      "enabled": true,
+      "emailVerified": true,
+      "groups": ["RMG_Managers"],
+      "credentials": [{ "type": "password", "value": "gestor123", "temporary": false }]
+    }
+  ]
+}

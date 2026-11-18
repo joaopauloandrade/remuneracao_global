@@ -1,18 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8080';
-const CHAVE_TOKEN = 'rmg.token';
-
-export function obterToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return window.sessionStorage.getItem(CHAVE_TOKEN);
-}
-
-export function definirToken(token: string | null): void {
-  if (token) {
-    window.sessionStorage.setItem(CHAVE_TOKEN, token);
-  } else {
-    window.sessionStorage.removeItem(CHAVE_TOKEN);
-  }
-}
+const API_URL = '/';
 
 export class ErroApi extends Error {
   constructor(
@@ -25,16 +11,17 @@ export class ErroApi extends Error {
 
 async function requisitar(path: string, metodo: string, corpo?: unknown): Promise<Response> {
   const headers = new Headers();
-  const token = obterToken();
-  if (token) headers.set('Authorization', `Bearer ${token}`);
   if (corpo !== undefined) headers.set('Content-Type', 'application/json');
-
-  const resp = await fetch(`${API_URL}${path}`, {
+  const resp = await fetch(`${API_URL}${path.replace(/^\//, '')}`, {
     method: metodo,
     headers,
     body: corpo === undefined ? undefined : JSON.stringify(corpo),
+    credentials: 'same-origin',
   });
-
+  if (resp.status === 401 && typeof window !== 'undefined') {
+    window.location.assign(`/auth/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+    throw new ErroApi(401, 'Sua sessão expirou. Redirecionando para o login…');
+  }
   if (!resp.ok) {
     let mensagem = `Erro ${resp.status}`;
     try {
